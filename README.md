@@ -3,9 +3,9 @@ Simple example in Go using CloudEvents SDK. This example exposes two HTTP REST e
 
 - `/produce` accepts a POST request and produce a CloudEvent to the `SINK` that by default is `http://localhost:8080/`
 
-This example uses Gorilla MUX to handle different requests to different endpoints. 
+This example uses [Gorilla MUX](https://github.com/gorilla/mux) to handle different requests to different endpoints. 
 
-The application by default runs on port 8081.
+The application by default runs on port 8081, this can be overriden by exporting an environment variable `SERVER_PORT`.
 
 
 ## Building and running the application
@@ -27,7 +27,7 @@ ko publish main.go
 To build, publish and run a docker image with `ko`:
 
 ```
-docker run -p 8081:8081 $(ko publish main.go)
+docker run -p 8081:8081 $(ko publish fmtok8s-go-cloudevents.go)
 ```
 
 Or if you just want to use Docker:

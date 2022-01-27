@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/gorilla/mux"
 	"log"
@@ -13,7 +12,7 @@ import (
 
 var SINK = getEnv("SINK", "http://localhost:8081")
 
-var PORT = getEnv("SERVER_PORT", ":8081")
+var SERVER_PORT = getEnv("SERVER_PORT", ":8081")
 
 type MyCloudEventData struct{
 	MyData    string `json:"myData"`
@@ -23,14 +22,15 @@ type MyCloudEventData struct{
 
 func ConsumeCloudEventHandler(ctx context.Context, event cloudevents.Event) {
 	data := MyCloudEventData{}
-	fmt.Printf("Got an Event: %s", event)
+	log.Printf("Got an Event: %s", event)
 	json.Unmarshal(event.Data(),&data)
 
-	fmt.Printf("MyCloudEventData Data: %v\n", data.MyData)
-	fmt.Printf("MyCloudEventData Counter: %v\n", data.MyCounter)
+	log.Printf("MyCloudEventData Data: %v\n", data.MyData)
+	log.Printf("MyCloudEventData Counter: %v\n", data.MyCounter)
 }
 
 func ProduceCloudEventHandler(writer http.ResponseWriter, request *http.Request) {
+	log.Printf("Producing a CloudEvent for SINK: %v\n", SINK)
 	p, err := cloudevents.NewHTTP()
 	if err != nil {
 		log.Fatalf("failed to create protocol: %s", err.Error())
@@ -49,7 +49,7 @@ func ProduceCloudEventHandler(writer http.ResponseWriter, request *http.Request)
 	data.MyData = "hello from Go"
 	data.MyCounter = 1
 	event.SetData(cloudevents.ApplicationJSON, &data)
-
+	log.Printf("Producing a CloudEvent with MyCloudEventData: %v\n", data)
 	// Set a target.
 	ctx := cloudevents.ContextWithTarget(context.Background(), SINK)
 	// Send that Event.
@@ -82,11 +82,10 @@ func main() {
 
 	router.Handle("/", h)
 
-	log.Printf("will listen on %v\n", PORT)
-	if err := http.ListenAndServe(PORT, router); err != nil {
+	log.Printf("will listen on %v\n", SERVER_PORT)
+	if err := http.ListenAndServe(SERVER_PORT, router); err != nil {
 		log.Fatalf("unable to start http server, %s", err)
 	}
-
 
 }
 
