@@ -21,8 +21,12 @@ type MyCloudEventData struct{
 }
 
 func ConsumeCloudEventHandler(ctx context.Context, event cloudevents.Event) {
-	data := MyCloudEventData{}
 	log.Printf("Got an Event: %s", event)
+	if event.Type() == "app-a.MyCloudEvent" {
+		log.Fatalf("Wrong Cloud Event Type, expected: 'app-a.MyCloudEvent' and got: %s", event.Type())
+	}
+	data := MyCloudEventData{}
+
 	json.Unmarshal(event.Data(),&data)
 
 	log.Printf("MyCloudEventData Data: %v\n", data.MyData)
@@ -44,7 +48,7 @@ func ProduceCloudEventHandler(writer http.ResponseWriter, request *http.Request)
 	// Create an Event.
 	event := cloudevents.NewEvent()
 	event.SetSource("application-b")
-	event.SetType("MyCloudEvent")
+	event.SetType("app-b.MyCloudEvent")
 	data := MyCloudEventData{}
 	data.MyData = "hello from Go"
 	data.MyCounter = 1
